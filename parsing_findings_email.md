@@ -12,28 +12,30 @@ Hi all,
 
 Quick update on the parsing validation for the Cribl migration. I've reviewed event samples from both destinations — Azure Sentinel (DCR) and Cortex XSIAM — and here's where we stand.
 
+---
+
 **Azure/DCR — Good to Move Forward**
 
-I validated our DCR template against the official Microsoft WindowsEvent schema and all 20 columns are correctly defined with the right types — nothing missing, no mismatches. Azure auto-adds a few system columns (TenantId, _ResourceId, etc.) at ingestion so those don't need to be in the DCR.
+I validated our DCR template against the official Microsoft WindowsEvent schema. Before I get to the result, I want to address something that might look confusing at first — when you export events from the WindowsEvent table in Log Analytics, you'll see **26 columns**. But our DCR only defines **20 columns**. Here's exactly why and where those 6 extra columns come from.
 
-One thing worth flagging for the Cribl pipeline team: `EventData` must be sent as a JSON object, not a string. If it's serialized as a string, all event-specific sub-fields (SubjectUserName, CommandLine, NewProcessName, etc.) will show up as null in Sentinel.
+**The 20 columns in our DCR** are the actual Windows event schema fields — the fields that carry real event data and that Cribl is responsible for populating:
 
-📎 Reference: https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/windowsevent
-
-**XSIAM — Vendor Call Needed**
-
-XSIAM shows more columns than Azure (48 vs 26) for the same events. This isn't a data problem — the raw EventData content is identical in both. The extra columns are XSIAM's own XDM (Cortex Data Model) normalisation layer remapping Windows fields into its standardised schema (e.g. NewProcessName → process_name, CommandLine → process_cmd) plus enrichment fields like process_md5 and event_result that XSIAM derives automatically.
-
-What I'd like to get clarity on is why some of those normalised fields are showing empty in current samples. I'd suggest we schedule a call with Palo Alto to confirm the Cribl → XSIAM field mapping is wired up correctly and that the XDM parsing is fully configured on their end.
-
-**Next Steps**
-- DCR/Sentinel path: proceed with Cribl pipeline configuration as planned
-- XSIAM: set up a call with Palo Alto vendor to review XDM field mapping and confirm expected ingestion format from Cribl Stream
-
-Let me know if anyone has questions or wants to jump on a call to walk through this.
-
-Thanks,  
-Raj Arsh  
-IS Security Engineering
-
----
+| Column | Type | Description |
+|---|---|---|
+| Channel | string | Event log channel (e.g. Security, System) |
+| Computer | string | Hostname where the event occurred |
+| Correlation | string | Activity ID used to correlate related events |
+| EventData | dynamic | All event-specific sub-fields as a JSON object (varies per EventID) |
+| EventID | int | The Windows event identifier |
+| EventLevel | int | Severity level (1=Critical, 2=Error, 3=Warning, 4=Info) |
+| EventLevelName | string | Human-readable level (e.g. "Information") |
+| EventOriginId | string | VM ID from Azure Instance Metadata Service |
+| EventRecordId | string | Sequential record number assigned when the event was logged |
+| Keywords | string | Bitmask identifying the event category (e.g. Audit Success) |
+| ManagementGroupName | string | Resource group context |
+| Opcode | string | Operational phase when the event was logged |
+| Provider | string | The Windows component that generated the event |
+| RawEventData | string | Raw event XML — populated only when EventData parsing fails |
+| SystemProcessId | int | PID of the process that generated the event |
+| SystemThreadId | int | Thread ID of the process that generated the event |
+| SystemUse
