@@ -1,0 +1,36 @@
+// ============================================================
+// Azure Log Analytics — WindowsEvent Sample Query
+// Purpose: Extract one representative event per EventID
+//          for Cribl Stream pipeline/parsing reference
+// Table:   WindowsEvent
+// ============================================================
+// Instructions:
+//   1. Open Azure Portal > Log Analytics workspace > Logs
+//   2. Paste this query and run it (adjust lookback window if needed)
+//   3. Export results: "Export" > "CSV (all columns)"
+//   4. Save as: azure_windowsevent_samples.csv
+// ============================================================
+
+let lookback = 30d; // adjust if needed — increase if some EventIDs are rare
+
+WindowsEvent
+| where TimeGenerated > ago(lookback)
+| summarize arg_max(TimeGenerated, *) by EventID          // one latest event per EventID
+| project
+    EventID,
+    SampleTime       = TimeGenerated,
+    Computer,
+    Channel,
+    Provider,
+    EventLevel,
+    Task,
+    Version,
+    Opcode,
+    Keywords,
+    SystemProcessId,
+    SystemThreadId,
+    SystemUserId,
+    EventOriginId,
+    EventData,        // dynamic JSON — critical for parsing work
+    RawEventData
+| order by EventID asc
