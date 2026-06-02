@@ -1,0 +1,34 @@
+// ============================================================
+// Azure Log Analytics — WindowsEvent Sample Query
+// Purpose: One sample per EventID (last 2 days) with ALL
+//          EventData sub-fields expanded as individual columns
+// Table:   WindowsEvent
+// ============================================================
+// Instructions:
+//   1. Open Azure Portal > Log Analytics workspace > Logs
+//   2. Paste and run
+//   3. Export: "Export" > "CSV (all columns)"
+//   4. Save as: azure_windowsevent_samples.csv
+// ============================================================
+
+WindowsEvent
+| where TimeGenerated > ago(2d)
+// One latest event per EventID
+| summarize arg_max(TimeGenerated, *) by EventID
+// bag_unpack expands every key inside EventData into its own column.
+// Fields specific to EventID 4688 (e.g. CommandLine, NewProcessName)
+// become real columns — null for EventIDs that don't have them.
+// Prefix "ED_" keeps them distinct from the standard columns.
+| evaluate bag_unpack(EventData, outputcolumnprefix='ED_')
+| project-reorder
+    EventID,
+    TimeGenerated,
+    Computer,
+    Channel,
+    Provider,
+    EventLevel,
+    Task,
+    Version,
+    Opcode,
+    Keywords,
+    SystemP
