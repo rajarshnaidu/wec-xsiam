@@ -121,3 +121,7 @@ dataset = microsoft_windows_raw
     raw_ends_clean = if(_raw_log ~= "</Event>$", "yes", "NO"),
     builtin_parsed = if(event_id != null and event_data != null, "yes", "NO")
 | comp count() as events by tail_stripped, fields_filled, raw_ends_clean, builtin_parsed
+
+events	tail_stripped	fields_filled	raw_ends_clean	builtin_parsed
+10753	yes	yes	yes	yes
+123	yes	yes	yes	NO
