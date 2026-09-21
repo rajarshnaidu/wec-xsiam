@@ -82,3 +82,32 @@ filter _raw_log contains "wec_ts="
   "_collector_name": "cribl_http:in_cribl_http",
   "_reporting_device_name": "DCHISWIFDC02.adhcscdev.net"
 }
+
+
+
+
+dataset = microsoft_windows_raw
+| filter _raw_log contains "wec_ts="
+| alter
+    t_wec_ts   = arrayindex(regextract(_raw_log, "wec_ts=([0-9TZ:.-]+)"), 0),
+    t_wec_host = arrayindex(regextract(_raw_log, "wec_host=([A-Za-z0-9._-]+)"), 0),
+    t_orig     = arrayindex(regextract(_raw_log, "(?s)(<Event.*</Event>).x1Fwec_ts="), 0)
+| alter t_orig_tail = arrayindex(regextract(t_orig, "(.{40})$"), 0)
+| fields t_wec_ts, t_wec_host, t_orig_tail
+| limit 10
+
+
+
+[INGEST:vendor="Microsoft", product="Windows", target_dataset="microsoft_windows_raw", no_hit=keep]
+filter _raw_log contains "wec_ts="
+| alter
+    wec_ts     = arrayindex(regextract(_raw_log, "wec_ts=([0-9TZ:.-]+)"), 0),
+    wec_host   = arrayindex(regextract(_raw_log, "wec_host=([A-Za-z0-9._-]+)"), 0),
+    cribl_host = arrayindex(regextract(_raw_log, "cribl_host=([A-Za-z0-9._-]+)"), 0),
+    cribl_ts   = arrayindex(regextract(_raw_log, "cribl_ts=([0-9TZ:.-]+)"), 0),
+    orig_event = arrayindex(regextract(_raw_log, "(?s)(<Event.*</Event>).x1Fwec_ts="), 0)
+| alter
+    wec_ts   = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", wec_ts),
+    cribl_ts = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", cribl_ts),
+    _raw_log = if(orig_event != null, orig_event, _raw_log)
+| fields -orig_event;
