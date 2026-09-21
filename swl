@@ -111,3 +111,13 @@ filter _raw_log contains "wec_ts="
     cribl_ts = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", cribl_ts),
     _raw_log = if(orig_event != null, orig_event, _raw_log)
 | fields -orig_event;
+
+
+dataset = microsoft_windows_raw
+| filter _transport = "cribl"
+| alter
+    tail_stripped  = if(_raw_log contains "x1Fwec_ts=", "NO", "yes"),
+    fields_filled  = if(wec_ts != null and wec_host != null and cribl_host != null and cribl_ts != null, "yes", "NO"),
+    raw_ends_clean = if(_raw_log ~= "</Event>$", "yes", "NO"),
+    builtin_parsed = if(event_id != null and event_data != null, "yes", "NO")
+| comp count() as events by tail_stripped, fields_filled, raw_ends_clean, builtin_parsed
