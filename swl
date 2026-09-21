@@ -163,3 +163,11 @@ dataset = microsoft_windows_raw
     raw_ends_clean = if(_raw_log ~= "</Event>$", "yes", "NO"),
     builtin_parsed = if(event_id != null and (event_data != null or user_data != null or not (_raw_log contains "<Data")), "yes", "NO")
 | comp count() as events by tail_stripped, fields_filled, raw_ends_clean, builtin_parsed
+
+
+
+dataset = microsoft_windows_raw
+| filter _transport = "cribl"
+| filter _raw_log contains "x1Fwec_ts=" or wec_ts = null
+| fields _insert_time, event_id, host_name, _raw_log
+| limit 20
