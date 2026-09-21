@@ -125,3 +125,15 @@ dataset = microsoft_windows_raw
 events	tail_stripped	fields_filled	raw_ends_clean	builtin_parsed
 10753	yes	yes	yes	yes
 123	yes	yes	yes	NO
+
+
+
+dataset = microsoft_windows_raw
+| filter _transport = "cribl" and wec_host != null
+| filter event_id = null or event_data = null
+| alter
+    has_eventdata = if(_raw_log contains "<EventData>", "yes", "no"),
+    has_userdata  = if(_raw_log contains "<UserData>", "yes", "no"),
+    userdata_parsed = if(user_data != null, "yes", "no")
+| comp count() as events by event_id, provider_name, channel, has_eventdata, has_userdata, userdata_parsed
+| sort desc events
