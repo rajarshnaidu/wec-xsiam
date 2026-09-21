@@ -4,7 +4,7 @@
 
 [INGEST:vendor="microsoft", product="windows", target_dataset="microsoft_windows_raw", no_hit=keep]
 filter _raw_log contains "wec_ts="
-| alter
+| altera
     wec_ts     = arrayindex(regextract(_raw_log, "wec_ts=([^\x1F\\\"]+)"), 0),
     wec_host   = arrayindex(regextract(_raw_log, "wec_host=([^\x1F\\\"]+)"), 0),
     cribl_host = arrayindex(regextract(_raw_log, "cribl_host=([^\x1F\\\"]+)"), 0),
@@ -142,3 +142,24 @@ dataset = microsoft_windows_raw
 
 events	event_id	provider_name	channel	has_eventdata	has_userdata	userdata_parsed
 21	40961	Microsoft-Windows-PowerShell	Microsoft-Windows-PowerShell/Operational	yes	no	no
+
+
+
+dataset = microsoft_windows_raw
+| filter _transport = "cribl" and wec_host != null
+| filter event_id = null or (event_data = null and user_data = null)
+| alter has_data_fields = if(_raw_log contains "<Data", "yes", "no")
+| comp count() as events by event_id, provider_name, has_data_fields
+| sort desc events
+
+
+
+dataset = microsoft_windows_raw
+| filter _transport = "cribl" and _raw_log !~= "^$"
+| filter wec_host != null or _raw_log contains "x1Fwec_ts="
+| alter
+    tail_stripped  = if(_raw_log contains "x1Fwec_ts=", "NO", "yes"),
+    fields_filled  = if(wec_ts != null and wec_host != null and cribl_host != null and cribl_ts != null, "yes", "NO"),
+    raw_ends_clean = if(_raw_log ~= "</Event>$", "yes", "NO"),
+    builtin_parsed = if(event_id != null and (event_data != null or user_data != null or not (_raw_log contains "<Data")), "yes", "NO")
+| comp count() as events by tail_stripped, fields_filled, raw_ends_clean, builtin_parsed
