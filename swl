@@ -137,3 +137,8 @@ dataset = microsoft_windows_raw
     userdata_parsed = if(user_data != null, "yes", "no")
 | comp count() as events by event_id, provider_name, channel, has_eventdata, has_userdata, userdata_parsed
 | sort desc events
+
+
+
+events	event_id	provider_name	channel	has_eventdata	has_userdata	userdata_parsed
+21	40961	Microsoft-Windows-PowerShell	Microsoft-Windows-PowerShell/Operational	yes	no	no
