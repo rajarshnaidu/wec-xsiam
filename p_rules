@@ -291,3 +291,28 @@ dataset = microsoft_windows_raw
     raw_len = len(_raw_log)
 | filter worker = "dwauslapp83" and ins = "19:19:23"
 | fields _insert_time, _time, status, worker, wec_host, wec_ts, cribl_ts, raw_len, _raw_log
+
+
+
+config timeframe = 4h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter
+    status    = if(wec_host = null, "FAILED", "ok"),
+    non_ascii = if(_raw_log ~= "[^\x00-\x7F]", "yes", "no")
+| comp count() as events by status, non_ascii
+
+
+config timeframe = 4h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter
+    is_failed = if(wec_host = null, 1, 0),
+    is_na     = if(_raw_log ~= "[^\x00-\x7F]", 1, 0),
+    worker    = coalesce(cribl_host, arrayindex(regextract(_raw_log, "cribl_host=([A-Za-z0-9._-]+)"), 0))
+| comp sum(is_failed) as failed, sum(is_na) as non_ascii_events, count() as total by _insert_time, worker
+| alter batch = if(failed = 0, "clean", if(failed = total, "all_failed", "mixed")),
+        has_na = if(non_ascii_events > 0, "yes", "no")
+| comp count() as batches by batch, has_na
