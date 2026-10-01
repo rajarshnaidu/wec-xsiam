@@ -226,4 +226,19 @@ events	status	_vendor	_product	_collector_name
 
 events	avg_lag_s	max_lag_s	status
 11083	1.0925742127582774	9	FAILED
-1966196	0.96594795228959918	18	ok
+1966196	0.96594795228959918	18	oka
+
+
+
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter status = if(wec_host = null, "FAILED", "ok"), raw_len = len(_raw_log)
+| alter
+    t_wec_ts   = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", arrayindex(regextract(_raw_log, "wec_ts=([0-9TZ:.-]+)"), 0)),
+    t_host     = arrayindex(regextract(_raw_log, "wec_host=([A-Za-z0-9._-]+)"), 0),
+    t_orig     = arrayindex(regextract(_raw_log, "(?s)(<Event.*</Event>).x1Fwec_ts="), 0)
+| alter rule_would_work = if(status = "ok", "n/a (already stripped)",
+                          if(t_wec_ts != null and t_host != null and t_orig != null, "yes", "NO"))
+| comp count() as events, avg(raw_len) as avg_len, max(raw_len) as max_len by status, rule_would_work
