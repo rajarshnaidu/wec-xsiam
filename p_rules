@@ -138,3 +138,35 @@ config timeframe = 1h
 
 events	batches	wts_shape	cts_shape
 10123	20	9999-99-99T99:99:99.999Z	9999-99-99T99:99:99.999Z
+
+
+
+
+
+#######
+
+
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter
+    is_failed = if(wec_host = null, 1, 0),
+    worker    = coalesce(cribl_host, arrayindex(regextract(_raw_log, "cribl_host=([A-Za-z0-9._-]+)"), 0))
+| comp sum(is_failed) as failed, count() as total by _insert_time, worker
+| alter failed_pct = round(multiply(divide(failed, total), 100))
+| filter failed > 0
+| sort asc _insert_time
+
+
+
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter
+    status = if(wec_host = null, "FAILED", "ok"),
+    cts    = coalesce(cribl_ts, parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", arrayindex(regextract(_raw_log, "cribl_ts=([0-9TZ:.-]+)"), 0))),
+    lag_s  = timestamp_diff(_insert_time, cts, "SECOND")
+| comp count() as events, avg(lag_s) as avg_lag_s, max(lag_s) as max_lag_s
+    by status, _vendor, _product, _collector_type, _collector_name
