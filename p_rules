@@ -242,3 +242,10 @@ config timeframe = 1h
 | alter rule_would_work = if(status = "ok", "n/a (already stripped)",
                           if(t_wec_ts != null and t_host != null and t_orig != null, "yes", "NO"))
 | comp count() as events, avg(raw_len) as avg_len, max(raw_len) as max_len by status, rule_would_work
+
+
+
+
+events	avg_len	max_len	status	rule_would_work
+1973303	1369.8793484832277	15690	ok	n/a (already stripped)
+13665	1460.0379802414927	4739	FAILED	yes
