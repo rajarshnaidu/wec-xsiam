@@ -316,3 +316,11 @@ config timeframe = 4h
 | alter batch = if(failed = 0, "clean", if(failed = total, "all_failed", "mixed")),
         has_na = if(non_ascii_events > 0, "yes", "no")
 | comp count() as batches by batch, has_na
+
+
+
+events	status	non_ascii
+3436359	ok	no
+20998	FAILED	no
+4	FAILED	yes
+1072	ok	yes
