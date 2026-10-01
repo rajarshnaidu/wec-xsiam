@@ -278,3 +278,16 @@ config timeframe = 24h
 | comp sum(is_failed) as failed, count() as total by t
 | alter failed_pct = divide(multiply(failed, 100), total)
 | sort asc t
+
+
+
+dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter
+    status = if(wec_host = null, "FAILED", "ok"),
+    worker = coalesce(cribl_host, arrayindex(regextract(_raw_log, "cribl_host=([A-Za-z0-9._-]+)"), 0)),
+    ins    = format_timestamp("%H:%M:%S", _insert_time, "America/Chicago"),
+    raw_len = len(_raw_log)
+| filter worker = "dwauslapp83" and ins = "19:19:23"
+| fields _insert_time, _time, status, worker, wec_host, wec_ts, cribl_ts, raw_len, _raw_log
