@@ -249,3 +249,20 @@ config timeframe = 1h
 events	avg_len	max_len	status	rule_would_work
 1973303	1369.8793484832277	15690	ok	n/a (already stripped)
 13665	1460.0379802414927	4739	FAILED	yes
+
+
+
+
+[INGEST:vendor="Microsoft", product="Windows", target_dataset="microsoft_windows_raw", no_hit=keep]
+filter _raw_log contains "wec_ts="
+| alter tail = arrayindex(regextract(_raw_log, "(?s)</Event>(.*wec_ts=.*)$"), 0)
+| alter
+    wec_ts     = arrayindex(regextract(tail, "wec_ts=([0-9TZ:.-]+)"), 0),
+    wec_host   = arrayindex(regextract(tail, "wec_host=([A-Za-z0-9._-]+)"), 0),
+    cribl_host = arrayindex(regextract(tail, "cribl_host=([A-Za-z0-9._-]+)"), 0),
+    cribl_ts   = arrayindex(regextract(tail, "cribl_ts=([0-9TZ:.-]+)"), 0)
+| alter
+    wec_ts   = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", wec_ts),
+    cribl_ts = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", cribl_ts),
+    _raw_log = if(tail != null, replace(_raw_log, tail, ""), _raw_log)
+| fields -tail;
