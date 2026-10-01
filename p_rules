@@ -134,3 +134,7 @@ config timeframe = 1h
     cts_shape = replex(arrayindex(regextract(_raw_log, "cribl_ts=([^\\]{0,40})"), 0), "[0-9]", "9")
 | comp count() as events, count_distinct(_insert_time) as batches by wts_shape, cts_shape
 | sort desc events
+
+
+events	batches	wts_shape	cts_shape
+10123	20	9999-99-99T99:99:99.999Z	9999-99-99T99:99:99.999Z
