@@ -158,6 +158,30 @@ config timeframe = 1h
 | filter failed > 0
 | sort asc _insert_time
 
+failed	total	_insert_time	worker	failed_pct
+77	77	Sep 30 2026 19:05:52	dwauslapp81	100
+1086	1086	Sep 30 2026 19:08:07	dwauslapp82	100
+85	1581	Sep 30 2026 19:08:27	dwauslapp81	5
+54	54	Sep 30 2026 19:10:42	dwauslapp81	100
+111	111	Sep 30 2026 19:15:57	dwauslapp82	100
+6	100	Sep 30 2026 19:16:18	dwauslapp82	6
+1053	1053	Sep 30 2026 19:18:53	dwauslapp83	100
+2000	2401	Sep 30 2026 19:19:23	dwauslapp83	83
+1363	1363	Sep 30 2026 19:24:34	dwauslapp81	100
+971	971	Sep 30 2026 19:25:53	dwauslapp81	100
+1172	1172	Sep 30 2026 19:28:10	dwauslapp81	100
+75	75	Sep 30 2026 19:29:03	dwauslapp83	100
+1059	1059	Sep 30 2026 19:33:39	dwauslapp82	100
+170	170	Sep 30 2026 19:37:43	dwauslapp81	100
+37	37	Sep 30 2026 19:39:54	dwauslapp82	100
+56	56	Sep 30 2026 19:40:18	dwauslapp82	100
+463	463	Sep 30 2026 19:42:42	dwauslapp81	100
+34	34	Sep 30 2026 19:45:49	dwauslapp82	100
+7	7	Sep 30 2026 19:49:31	dwauslapp81	100
+244	2244	Sep 30 2026 19:51:57	dwauslapp81	11
+
+
+
 
 
 config timeframe = 1h
@@ -167,6 +191,6 @@ config timeframe = 1h
 | alter
     status = if(wec_host = null, "FAILED", "ok"),
     cts    = coalesce(cribl_ts, parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", arrayindex(regextract(_raw_log, "cribl_ts=([0-9TZ:.-]+)"), 0))),
-    lag_s  = timestamp_diff(_insert_time, cts, "SECOND")
+    lag_s  = timestamp_diff(_insert_time, cts, "SECOND") -- it's erroring out here (cts)
 | comp count() as events, avg(lag_s) as avg_lag_s, max(lag_s) as max_lag_s
     by status, _vendor, _product, _collector_type, _collector_name
