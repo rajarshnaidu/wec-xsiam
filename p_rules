@@ -26,5 +26,6 @@ config timeframe = 10m
     tail_stripped  = if(_raw_log contains "x1Fwec_ts=", "NO", "yes"),
     fields_filled  = if(wec_ts != null and wec_host != null and cribl_host != null and cribl_ts != null, "yes", "NO"),
     raw_ends_clean = if(_raw_log ~= "</Event>$", "yes", "NO")
-| filter tail_stripped contains "NO"
-| 
+| alter sep_len = len(arrayindex(regextract(_raw_log, "(?s)</Event>(.{0,12})wec_ts="), 0))
+| comp count() as events by wec_host, cribl_host, tail_stripped, fields_filled, sep_len
+| sort asc wec_host
