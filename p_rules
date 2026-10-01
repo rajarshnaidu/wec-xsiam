@@ -194,3 +194,24 @@ config timeframe = 1h
     lag_s  = timestamp_diff(_insert_time, cts, "SECOND") -- it's erroring out here (cts)
 | comp count() as events, avg(lag_s) as avg_lag_s, max(lag_s) as max_lag_s
     by status, _vendor, _product, _collector_type, _collector_name
+
+
+
+
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter status = if(wec_host = null, "FAILED", "ok")
+| comp count() as events by status, _vendor, _product, _collector_name
+
+
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter status = if(wec_host = null, "FAILED", "ok")
+| alter lag_s = if(status = "FAILED",
+      timestamp_diff(_insert_time, parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", arrayindex(regextract(_raw_log, "cribl_ts=([0-9TZ:.-]+)"), 0)), "SECOND"),
+      timestamp_diff(_insert_time, cribl_ts, "SECOND"))
+| comp count() as events, avg(lag_s) as avg_lag_s, max(lag_s) as max_lag_s by status
