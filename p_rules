@@ -266,3 +266,15 @@ filter _raw_log contains "wec_ts="
     cribl_ts = parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", cribl_ts),
     _raw_log = if(tail != null, replace(_raw_log, tail, ""), _raw_log)
 | fields -tail;
+
+
+
+config timeframe = 24h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl"
+| filter wec_host != null or _raw_log contains "wec_ts="
+| alter is_failed = if(wec_host = null, 1, 0), t = _insert_time
+| bin t span = 1h
+| comp sum(is_failed) as failed, count() as total by t
+| alter failed_pct = divide(multiply(failed, 100), total)
+| sort asc t
