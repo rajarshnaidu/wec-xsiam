@@ -86,3 +86,19 @@ events	first_seen	last_seen	status	raw_wec_host	_collector_name	eid	starts_event
 2	Sep 30 2026 19:24:34	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4702	yes	yes
 2	Sep 30 2026 19:15:57	Sep 30 2026 19:15:57	FAILED	dwauswapp23	cribl_http:in_cribl_http	40961	yes	NO
 1	Sep 30 2026 19:42:42	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4688	yes	yes
+
+
+
+
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl" and _raw_log contains "wec_ts="
+| alter
+    worker    = coalesce(cribl_host, arrayindex(regextract(_raw_log, "cribl_host=([A-Za-z0-9._-]+)"), 0)),
+    is_failed = if(wec_host = null, 1, 0),
+    t         = _insert_time
+| bin t span = 1m
+| comp sum(is_failed) as failed, count() as total by t, worker, _collector_name
+| alter failed_pct = round(multiply(divide(failed, total), 100))
+| filter failed > 0
+| sort asc t
