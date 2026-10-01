@@ -53,3 +53,36 @@ config timeframe = 1h
 | comp count() as events, min(_insert_time) as first_seen, max(_insert_time) as last_seen
     by status, raw_wec_host, _collector_name, eid, starts_event, has_newline
 | sort asc status, desc events
+
+
+
+events	first_seen	last_seen	status	raw_wec_host	_collector_name	eid	starts_event	has_newline
+2731	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4624	yes	NO
+2344	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4776	yes	NO
+2040	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4648	yes	NO
+1101	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4688	yes	NO
+423	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4672	yes	yes
+286	Sep 30 2026 19:05:52	Sep 30 2026 19:45:49	FAILED	dwauswapp23	cribl_http:in_cribl_http	4688	yes	NO
+281	Sep 30 2026 19:08:07	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4670	yes	NO
+214	Sep 30 2026 19:19:23	Sep 30 2026 19:33:39	FAILED	dwauswsmap03	cribl_http:in_cribl_http		yes	yes
+143	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	5140	yes	yes
+119	Sep 30 2026 18:52:35	Sep 30 2026 19:28:10	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4768	yes	yes
+117	Sep 30 2026 19:08:07	Sep 30 2026 19:37:43	FAILED	dwauswsmap03	cribl_http:in_cribl_http		yes	NO
+82	Sep 30 2026 19:05:52	Sep 30 2026 19:45:49	FAILED	dwauswapp23	cribl_http:in_cribl_http	4670	yes	NO
+54	Sep 30 2026 19:25:53	Sep 30 2026 19:33:39	FAILED	dwauswsmap03	cribl_http:in_cribl_http	5136	yes	NO
+35	Sep 30 2026 18:52:35	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	40961	yes	NO
+27	Sep 30 2026 19:10:42	Sep 30 2026 19:45:49	FAILED	dwauswapp23	cribl_http:in_cribl_http	4672	yes	yes
+20	Sep 30 2026 19:19:23	Sep 30 2026 19:33:39	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4634	yes	NO
+18	Sep 30 2026 19:05:52	Sep 30 2026 19:45:49	FAILED	dwauswapp23	cribl_http:in_cribl_http		yes	NO
+8	Sep 30 2026 19:05:52	Sep 30 2026 19:40:18	FAILED	dwauswapp23	cribl_http:in_cribl_http	4776	yes	NO
+7	Sep 30 2026 19:05:52	Sep 30 2026 19:15:57	FAILED	dwauswapp23	cribl_http:in_cribl_http	5140	yes	yes
+7	Sep 30 2026 19:08:07	Sep 30 2026 19:33:39	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4771	yes	NO
+7	Sep 30 2026 19:18:53	Sep 30 2026 19:24:34	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4735	yes	NO
+5	Sep 30 2026 19:05:52	Sep 30 2026 19:05:52	FAILED	dwauswapp23	cribl_http:in_cribl_http	4672	yes	NO
+5	Sep 30 2026 19:08:07	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4625	yes	NO
+5	Sep 30 2026 19:05:52	Sep 30 2026 19:05:52	FAILED	dwauswapp23	cribl_http:in_cribl_http	4648	yes	NO
+5	Sep 30 2026 19:05:52	Sep 30 2026 19:05:52	FAILED	dwauswapp23	cribl_http:in_cribl_http	4634	yes	NO
+5	Sep 30 2026 19:05:52	Sep 30 2026 19:05:52	FAILED	dwauswapp23	cribl_http:in_cribl_http	4624	yes	NO
+2	Sep 30 2026 19:24:34	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4702	yes	yes
+2	Sep 30 2026 19:15:57	Sep 30 2026 19:15:57	FAILED	dwauswapp23	cribl_http:in_cribl_http	40961	yes	NO
+1	Sep 30 2026 19:42:42	Sep 30 2026 19:42:42	FAILED	dwauswsmap03	cribl_http:in_cribl_http	4688	yes	yes
