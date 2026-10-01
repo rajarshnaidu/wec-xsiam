@@ -215,3 +215,15 @@ config timeframe = 1h
       timestamp_diff(_insert_time, parse_timestamp("%Y-%m-%dT%H:%M:%E3SZ", arrayindex(regextract(_raw_log, "cribl_ts=([0-9TZ:.-]+)"), 0)), "SECOND"),
       timestamp_diff(_insert_time, cribl_ts, "SECOND"))
 | comp count() as events, avg(lag_s) as avg_lag_s, max(lag_s) as max_lag_s by status
+
+
+
+
+events	status	_vendor	_product	_collector_name
+1961788	ok	Microsoft	Windows	cribl_http:in_cribl_http
+10267	FAILED	Microsoft	Windows	cribl_http:in_cribl_http
+
+
+events	avg_lag_s	max_lag_s	status
+11083	1.0925742127582774	9	FAILED
+1966196	0.96594795228959918	18	ok
