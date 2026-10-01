@@ -29,3 +29,15 @@ config timeframe = 10m
 | alter sep_len = len(arrayindex(regextract(_raw_log, "(?s)</Event>(.{0,12})wec_ts="), 0))
 | comp count() as events by wec_host, cribl_host, tail_stripped, fields_filled, sep_len
 | sort asc wec_host
+
+events	wec_host	cribl_host	tail_stripped	fields_filled	sep_len
+1322			NO	NO	4
+2477	dwauswapp23	dwauslapp82	yes	yes	
+1457	dwauswapp23	dwauslapp83	yes	yes	
+3767	dwauswapp23	dwauslapp81	yes	yes	
+108916	dwauswsmap03	dwauslapp81	yes	yes	
+104520	dwauswsmap03	dwauslapp83	yes	yes	
+120786	dwauswsmap03	dwauslapp82	yes	yes	
+
+
+
