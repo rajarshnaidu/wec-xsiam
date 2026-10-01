@@ -41,3 +41,15 @@ events	wec_host	cribl_host	tail_stripped	fields_filled	sep_len
 
 
 
+config timeframe = 1h
+| dataset = microsoft_windows_raw
+| filter _collector_name contains "cribl" and _raw_log contains "wec_ts="
+| alter
+    status       = if(wec_host = null, "FAILED", "ok"),
+    raw_wec_host = arrayindex(regextract(_raw_log, "wec_host=([A-Za-z0-9._-]+)"), 0),
+    eid          = arrayindex(regextract(_raw_log, "<EventID>(\d+)</EventID>"), 0),
+    starts_event = if(_raw_log ~= "^<Event", "yes", "NO"),
+    has_newline  = if(_raw_log ~= "[\r\n]", "yes", "NO")
+| comp count() as events, min(_insert_time) as first_seen, max(_insert_time) as last_seen
+    by status, raw_wec_host, _collector_name, eid, starts_event, has_newline
+| sort asc status, desc events
